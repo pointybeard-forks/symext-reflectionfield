@@ -1,11 +1,60 @@
-# Field: Reflection
+# Reflection Field for Symphony CMS
 
-This field generates values based on other fields from the same entry.
-Uses XPath and optionally XSLT.
+A field for [Symphony CMS][ext-Symphony-cms] generates values based on other fields from the same entry using XPath and XSLT.
 
-## Usage
+-   [Installation](#installation)
+    -   [With Git and Composer](#with-git-and-composer)
+    -   [With Orchestra](#with-orchestra)
+-   [Basic Usage](#basic-usage)
+-   [About](#about)
+    -   [Requirements](#dependencies)
+    -   [Dependencies](#dependencies)
+-   [Support](#support)
+-   [Contributing](#contributing)
+-   [License](#license)
 
-When saving an entry Reflection field creates an internal `data` structure similar to what Symphony provides on the front-end. Besides the field data contextual parameters like the root and workspace paths and the section handle are available as well.
+## Installation
+
+This is an extension for [Symphony CMS][ext-Symphony-cms]. Add it to the `/extensions` folder of your Symphony CMS installation, then enable it though the interface.
+
+### With Git and Composer
+
+```bash
+$ git clone --depth 1 https://github.com/pointybeard/symext-reflectionfield.git extensions/reflectionfield
+$ composer update -vv --profile -d ./extensions/reflectionfield
+```
+After finishing the steps above, enable "Field: Reflection" though the administration interface or, if using [Orchestra][ext-Orchestra], with `bin/extension enable reflectionfield`.
+
+### With Orchestra
+
+1. Add the following extension defintion to your `.orchestra/build.json` file in the `"extensions"` block:
+
+```json
+{
+    "name": "reflectionfield",
+    "repository": {
+        "url": "https://github.com/pointybeard/symext-reflectionfield.git"
+    }
+}
+```
+
+2. Run the following command to rebuild your Extensions
+
+```bash
+$ bin/orchestra build \
+    --skip-import-sections \
+    --database-skip-import-data \
+    --database-skip-import-structure \
+    --skip-create-author \
+    --skip-seeders \
+    --skip-git-reset \
+    --skip-composer \
+    --skip-postbuild
+```
+
+## Basic Usage
+
+This extension adds a new field called "Reflection". It can be added to sections like any other field. When saving an entry, Reflection field creates an internal `data` structure similar to what Symphony provides on the front-end. Besides the field data, contextual parameters like the root and workspace paths and the section handle are available as well.
 
 ```xml
 <data>
@@ -58,7 +107,42 @@ Reflection Field assumes that the entry has already saved some data for the said
 In the case of XML Importer this means that you have to include the Reflection field within the import items, otherwise XML Importer will not find any data within your database to update.
 You can insert an empty string, this would be sufficient for Reflection Field to be able to save the necessary data.
 
+## About
 
+### Requirements
+
+- This extension works with PHP 7.4 or above.
+
+### Dependencies
+
+This extension depends on the following Composer libraries:
+
+-   [Symphony CMS: Extended Base Class Library][dep-symphony-extended]
+
+## Support
+
+If you believe you have found a bug, please report it using the [GitHub issue tracker][ext-issues], or better yet, fork the library and submit a pull request.
+
+## Contributing
+
+We encourage you to contribute to this project. Please check out the [Contributing to this project][doc-CONTRIBUTING] documentation for guidelines about how to get involved.
+
+## Author
+-   Symphony Community - <https://github.com/symphonists/reflectionfield/graphs/contributors>
+-   Alannah Kearney - <https://github.com/pointybeard>
+-   See also the list of [contributors][ext-contributor] who participated in this project
+
+## License
+"Reflection Field for Symphony CMS" is released under the MIT License. See [LICENCE][doc-LICENCE] for details.
+
+[doc-CONTRIBUTING]: https://github.com/pointybeard/symext-reflectionfield/blob/master/CONTRIBUTING.md
+[doc-LICENCE]: http://www.opensource.org/licenses/MIT
+[dep-symphony-extended]: https://github.com/pointybeard/symphony-extended
+[ext-issues]: https://github.com/pointybeard/symext-reflectionfield/issues
+[ext-Symphony-cms]: http://getsymphony.com
+[ext-Orchestra]: https://github.com/pointybeard/orchestra
+[ext-contributor]: https://github.com/pointybeard/symext-reflectionfield/contributors
+[ext-docs]: https://github.com/pointybeard/symext-reflectionfield/blob/master/.docs/toc.md
 
 [1]: https://github.com/symphonists/reflectionfield/issues/34
 [2]: https://github.com/symphonists/reflectionfield/issues/35
