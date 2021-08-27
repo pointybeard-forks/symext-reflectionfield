@@ -1,36 +1,62 @@
 <?php
 
-    class Extension_ReflectionField extends Extension
+declare(strict_types=1);
+
+/*
+ * This file is part of the "Reflection Field for Symphony CMS" repository.
+ *
+ * Copyright 2008-2017 Rowan Lewis, Symphonists
+ * Copyright 2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
+if (!file_exists(__DIR__.'/vendor/autoload.php')) {
+    throw new Exception(sprintf('Could not find composer autoload file %s. Did you run `composer update` in %s?', __DIR__.'/vendor/autoload.php', __DIR__));
+}
+
+require_once __DIR__.'/vendor/autoload.php';
+
+use pointybeard\Symphony\Extended;
+
+// Check if the class already exists before declaring it again.
+if (false == class_exists('\\extension_reflectionfield')) {
+    final class extension_reflectionfield extends Extended\AbstractExtension
     {
-        /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
         Definition:
     -------------------------------------------------------------------------*/
 
-        protected static $fields = array();
+        protected static $fields = [];
+
+        private $tableName = 'tbl_fields_reflection';
 
         public function uninstall()
         {
-            Symphony::Database()->query('DROP TABLE `tbl_fields_reflection`');
+            parent::uninstall();
+
+            return Symphony::Database()->query("DROP TABLE IF EXISTS `{$this->tableName}`");
         }
 
         public function install()
         {
-            Symphony::Database()->query("
-				CREATE TABLE IF NOT EXISTS `tbl_fields_reflection` (
-					`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-					`field_id` INT(11) UNSIGNED NOT NULL,
-					`xsltfile` VARCHAR(255) DEFAULT NULL,
-					`expression` VARCHAR(255) DEFAULT NULL,
-					`formatter` VARCHAR(255) DEFAULT NULL,
-					`override` ENUM('yes', 'no') DEFAULT 'no',
-					`hide` ENUM('yes', 'no') DEFAULT 'no',
-					`fetch_associated_counts` ENUM('yes','no') DEFAULT 'no',
-					PRIMARY KEY (`id`),
-					KEY `field_id` (`field_id`)
-				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-			");
+            parent::install();
 
-            return true;
+            return Symphony::Database()->query(
+                "CREATE TABLE IF NOT EXISTS `{$this->tableName}` (
+                    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                    `field_id` INT(11) UNSIGNED NOT NULL,
+                    `xsltfile` VARCHAR(255) DEFAULT NULL,
+                    `expression` VARCHAR(255) DEFAULT NULL,
+                    `formatter` VARCHAR(255) DEFAULT NULL,
+                    `override` ENUM('yes', 'no') DEFAULT 'no',
+                    `hide` ENUM('yes', 'no') DEFAULT 'no',
+                    `fetch_associated_counts` ENUM('yes','no') DEFAULT 'no',
+                    PRIMARY KEY (`id`),
+                    KEY `field_id` (`field_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+            );
         }
 
         public function update($previousVersion = false)
@@ -50,40 +76,40 @@
 
         public function getSubscribedDelegates()
         {
-            return array(
-                array(
+            return [
+                [
                     'page' => '/publish/new/',
                     'delegate' => 'EntryPostCreate',
                     'callback' => 'compileBackendFields',
-                ),
-                array(
+                ],
+                [
                     'page' => '/publish/edit/',
                     'delegate' => 'EntryPostEdit',
                     'callback' => 'compileBackendFields',
-                ),
-                array(
+                ],
+                [
                     'page' => '/xmlimporter/importers/run/',
                     'delegate' => 'XMLImporterEntryPostCreate',
                     'callback' => 'compileBackendFields',
-                ),
-                array(
+                ],
+                [
                     'page' => '/xmlimporter/importers/run/',
                     'delegate' => 'XMLImporterEntryPostEdit',
                     'callback' => 'compileBackendFields',
-                ),
-                array(
+                ],
+                [
                     'page' => '/frontend/',
                     'delegate' => 'EventPostSaveFilter',
                     'callback' => 'compileFrontendFields',
-                ),
-            );
+                ],
+            ];
         }
 
-    /*-------------------------------------------------------------------------
-        Utilities:
-    -------------------------------------------------------------------------*/
+        /*-------------------------------------------------------------------------
+            Utilities:
+        -------------------------------------------------------------------------*/
 
-        public function getXPath($entry, $template = null, $fetch_associated_counts = null, $handle = 'reflection-field')
+        public function getXPath($entry, $template = null, $fetch_associated_counts = null, $handle = 'reflection-field'): DOMXPath
         {
             $xml = $this->buildXML($handle, $entry);
             $dom = new DOMDocument();
@@ -92,7 +118,7 @@
 
             // Transform XML if template is provided
             if (!empty($template)) {
-                $template = UTILITIES . '/' . preg_replace(array('%/+%', '%(^|/)../%'), '/', $template);
+                $template = UTILITIES.'/'.preg_replace(['%/+%', '%(^|/)../%'], '/', $template);
 
                 if (file_exists($template)) {
                     $xslt = new DomDocument();
@@ -119,7 +145,7 @@
             return $xpath;
         }
 
-        private function buildXML($handle = 'reflection-field', $entry)
+        private function buildXML($handle = 'reflection-field', $entry): XMLElement
         {
             $xml = new XMLElement('data');
 
@@ -129,7 +155,7 @@
             return $xml;
         }
 
-        private function buildParams()
+        private function buildParams(): XMLElement
         {
             $xml = new XMLElement('params');
 
@@ -137,7 +163,7 @@
             $upload_size_sym = Symphony::Configuration()->get('max_upload_size', 'admin');
             $date = new DateTime();
 
-            $params = array(
+            $params = [
                 'today' => $date->format('Y-m-d'),
                 'current-time' => $date->format('H:i'),
                 'this-year' => $date->format('Y'),
@@ -146,13 +172,13 @@
                 'timezone' => $date->format('P'),
                 'website-name' => General::sanitize(Symphony::Configuration()->get('sitename', 'general')),
                 'root' => URL,
-                'workspace' => URL . '/workspace',
+                'workspace' => URL.'/workspace',
                 'http-host' => HTTP_HOST,
                 'upload-limit' => min($upload_size_php, $upload_size_sym),
                 'symphony-version' => Symphony::Configuration()->get('version', 'symphony'),
-            );
+            ];
 
-            foreach($params as $name => $value) {
+            foreach ($params as $name => $value) {
                 $xml->appendChild(
                     new XMLElement($name, $value)
                 );
@@ -161,7 +187,7 @@
             return $xml;
         }
 
-        private function buildEntry($handle = 'reflection-field', $entry)
+        private function buildEntry(string $handle = 'reflection-field', $entry): XMLElement
         {
             $xml = new XMLElement($handle);
             $data = $entry->getData();
@@ -177,7 +203,7 @@
             $entry_xml->setAttribute('id', $entry->get('id'));
 
             // Add associated entry counts
-            if ($fetch_associated_counts == 'yes') {
+            if ('yes' == $fetch_associated_counts) {
                 $associated = $entry->fetchAllAssociatedEntryCounts();
 
                 if (is_array($associated) and !empty($associated)) {
@@ -213,7 +239,7 @@
             return $xml;
         }
 
-        private function buildSystemDate($entry)
+        private function buildSystemDate($entry): XMLElement
         {
             $xml = new XMLElement('system-date');
 
@@ -232,16 +258,21 @@
             return $xml;
         }
 
-    /*-------------------------------------------------------------------------
-        Fields:
-    -------------------------------------------------------------------------*/
+        /*-------------------------------------------------------------------------
+            Fields:
+        -------------------------------------------------------------------------*/
 
-        public function registerField(Field $field)
+        public function registerField(Field $field): void
         {
             self::$fields[$field->get('id')] = $field;
         }
 
-        public function compileBackendFields($context)
+        public static function deregisterFields(): void
+        {
+            self::$fields = [];
+        }
+
+        public function compileBackendFields($context): void
         {
             if (empty(self::$fields)) {
                 self::$fields = $context['section']->fetchFields('reflection');
@@ -252,10 +283,11 @@
             }
         }
 
-        public function compileFrontendFields($context)
+        public function compileFrontendFields($context): void
         {
             foreach (self::$fields as $field) {
                 $field->compile($context['entry']);
             }
         }
     }
+}
