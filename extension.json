@@ -1,0 +1,37 @@
+{
+    "id": "reflectionfield",
+    "name": "Reflection Field",
+    "description": "A field for Symphony CMS that generates values based on other fields from the same entry via XPath and XSLT.",
+    "repo": "https://github.com/pointybeard/symext-reflectionfield.git",
+    "homepage": "https://github.com/pointybeard/symext-reflectionfield",
+    "type": [
+        "Field"
+    ],
+    "authors": [
+        {
+            "name": "Symphony Community",
+            "homepage": "https://github.com/symphonists/reflectionfield/graphs/contributors",
+            "role": "Developer"
+        },
+        {
+            "name": "Alannah Kearney",
+            "email": "hi@alannahkearney.com",
+            "homepage": "http://www.alannahkearney.com",
+            "role": "Developer"
+        }
+    ],
+    "releases": [
+        {
+            "version": "2.0.6",
+            "date": "2021-08-27",
+            "min": "2.7.10",
+            "max": "2.x.x"
+        },
+        {
+            "version": "2.0.5",
+            "date": "2021-01-11",
+            "min": "2.7.10",
+            "max": "2.x.x"
+        }
+    ]
+}
