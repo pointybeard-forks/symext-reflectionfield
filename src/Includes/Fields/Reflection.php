@@ -16,8 +16,6 @@ if (!defined('__IN_SYMPHONY__')) {
     exit('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 }
 
-require_once FACE.'/interface.exportablefield.php';
-
 class FieldReflection extends Field implements ExportableField
 {
     protected static $compiling = 0;
