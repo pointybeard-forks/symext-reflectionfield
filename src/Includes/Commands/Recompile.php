@@ -155,6 +155,9 @@ class Recompile extends Console\AbstractCommand implements Console\Interfaces\Au
                 // Clear the registered fields so we get accurate results each time
                 Extension_ReflectionField::deregisterFields();
 
+                // Tell the entry to re-save itself which will trigger the reflection field contents to be regenerated
+                $e->commit();
+
                 // Only show progress bars if verbosity is `-vvv` (E_NOTICE)
                 if(true == $showProgressBars) {
                     $progress->advance();
